@@ -17,14 +17,13 @@ const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 io.on('connection', (socket) => {
     console.log('A user connected!');
 
-    socket.on('join topic', (topic) => {
+    socket.on('join topic', async (topic) => {
         const rooms = Array.from(socket.rooms);
         rooms.forEach(room => {
             if ( room !== socket.id ) {

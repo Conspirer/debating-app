@@ -29,10 +29,14 @@
         </form>
 
         <div id="status">Connecting...</div>
-
+        
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
         <script src="/socket.io/socket.io.js"></script>
         <script>
             const socket = io({ transports: ['polling'] });
+            const SUPABASE_URL = 'https://uaimkoihbtpqtsbwwywa.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhaW1rb2loYnRwcXRzYnd3eXdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4OTQ2NTEsImV4cCI6MjA3MjQ3MDY1MX0.4-6M8TtT0PRMfyIsvSo3dpjaj2IXatdgffWNWwruJqU';
+            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
             const statusDiv = document.getElementById('status');
             const topicForm = document.getElementById('topic-form');
@@ -43,22 +47,53 @@
 
             let currentTopic = '';
 
+            const loadMessages = async(topic) => {
+                messages.innerHTML ='';
+                messages.appendChild(document.createElement('li')),textContent = `Joined Topic "${currentTopic}"`;
+                const {data, error} = await supabaseClient
+                .from('messages')
+                .select('msg')
+                .eq('topic', topic)
+                .order('id', { ascending: true});
+
+                if (error) {
+                    console.error('Error fetching messages:', error);
+                    messages.appendChild(document.createElement('li')).textContent = 'Error loading history.';
+                } else {
+                    data.forEach(item => {
+                        messages.appendChild(document.createElement('li')).textContent = item.msg;
+                    });
+                    messages.appendChild(document.createElement('li')).textContent = '--- Previous Messages ---';
+                }
+            };
+
             topicForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 if (topicInput.value) {
-                    socket.emit('join topic', topicInput.value);
                     currentTopic = topicInput.value;
-                    messages.innerHTML = '';
-                    messages.appendChild(document.createElement('li')).textContent = `Joined Topic "${currentTopic}"`;
+                    socket.emit('join topic', currentTopic);
+                    loadMessages(currentTopic);
                     topicInput.value = '';
                 }
             })
             
-            form.addEventListener('submit', (e) => {
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 if (input.value && currentTopic) {
-                    socket.emit('chat message', { topic: currentTopic, msg: input.value});
-                    input.value = '';
+                    const messageText = input.value;
+                    const { data, error } = await supabaseClient
+                    .from('messages')
+                    .insert({ topic: currentTopic, msg: messageText });
+
+                    if (error)
+                    {
+                        console.error('Error saving message to Supabase:', error);
+                    }
+                    else
+                    {
+                        socket.emit('chat message', { topic: currentTopic, msg: input.value});
+                        input.value = '';
+                    }
                 }
             });
 
