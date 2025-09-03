@@ -1,22 +1,34 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Debating App</title>
-        <style>
-            body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-            #topic-form, #chat-form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; display: flex; box-sizing: border-box; backdrop-filter: blur(10px); }
-            #topic-form { top: 0; left: 0; right: 0; height: 3rem; }
-            #chat-form { bottom: 0; left: 0; right: 0; height: 3rem; }
-            #topic-input, #input-box { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-            #topic-input:focus, #input-box:focus { outline: none; }
-            #topic-form > button, #chat-form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; cursor: pointer; }
-            #messages { list-style-type: none; margin: 3.5rem 0 3.5rem 0; padding: 0; }
-            #messages > li { padding: 0.5rem 1rem; }
-            #messages > li:nth-child(odd) { background: #efefef; }
-        </style>
-    </head>
-    <body>
-        <h1>Debating App</h1>
+<head>
+  <title>Debating App</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <header class="header">
+      <h1 class="logo">Debating App</h1>
+      <div class="header-buttons">
+        <button class="join-btn">Start Chat</button>
+        <button class="about-btn">About</button>
+      </div>
+    </header>
+
+    <main class="chat-area">
+      <ul id="messages" class="messages-list"></ul>
+    </main>
+
+    <div class="floating-topics-container">
+      <div id="topic-list" class="topic-list">
+        <button class="topic-btn">AI Ethics</button>
+        <button class="topic-btn">The Future of Work</button>
+        <button class="topic-btn">Climate Change Policies</button>
+        <button class="topic-btn">Social Media Impact</button>
+        <button class="topic-btn">Universal Basic Income</button>
+      </div>
+    </div>
 
         <form id="topic-form" action="">
             <input id="topic-input" autocomplete="off" placeholder="Enter topic to join..." /><button>Join</button>
