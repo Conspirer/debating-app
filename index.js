@@ -24,10 +24,24 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
     console.log('A user connected!');
 
-    socket.on('chat message', (msg) => {
-        console.log('message: '+ msg);
+    socket.on('join topic', (topic) => {
+        const rooms = Array.from(socket.rooms);
+        rooms.forEach(room => {
+            if ( room !== socket.id ) {
+                socket.leave(room);
+                console.log(`User left room:${room}`);
+            }
+        });
 
-        io.emit('chat message', msg);
+        socket.join(topic);
+        console.log(`User joined topic: ${topic}`);
+        io.to(socket.id).emit('chat message', `Welcome! You have joined the topic: ${topic}.`);
+    });
+
+    socket.on('chat message', (data) => {
+        const { topic, msg } = data;
+        console.log(`Message from topic "${topic}": ${msg}`);
+        io.to(topic).emit('chat message', msg);
     });
 
     socket.on('disconnect', () => {
