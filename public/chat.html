@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debating App</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <header class="header">
+      <h1 class="logo">Debating App</h1>
+      <div class="header-buttons">
+        <button class="leave-btn">Leave</button>
+      </div>
+    </header>
+
+    <main class="chat-area">
+      <ul id="messages" class="messages-list"></ul>
+    </main>
+
+    <div class="bottom-ui-container">
+      <form id="chat-form" class="chat-form">
+          <input id="input-box" class="input-box" autocomplete="off" placeholder="Type your message..." />
+          <button class="send-btn">Send</button>
+      </form>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    const SUPABASE_URL = 'https://uaimkoihbtpqtsbwwywa.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhaW1rb2loYnRwcXRzYnd3eXdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4OTQ2NTEsImV4cCI6MjA3MjQ3MDY1MX0.4-6M8TtT0PRMfyIsvSo3dpjaj2IXatdgffWNWwruJqU';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const socket = io({ transports: ['polling'] });
+
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('input-box');
+    const messages = document.getElementById('messages');
+    const leaveBtn = document.querySelector('.leave-btn');
+
+    // Get the topic from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentTopic = urlParams.get('topic');
+
+
+    const loadMessages = async (topic) => {
+        messages.innerHTML = '';
+        messages.appendChild(document.createElement('li')).textContent = `Joined topic: "${topic}"`;
+        const { data, error } = await supabaseClient
+            .from('messages')
+            .select('msg')
+            .eq('topic', topic)
+            .order('id', { ascending: true });
+        if (error) {
+            console.error('Error fetching messages:', error);
+            messages.appendChild(document.createElement('li')).textContent = 'Error loading history.';
+        } else {
+            messages.appendChild(document.createElement('li')).textContent = '--- Previous Messages ---';
+            data.forEach(item => {
+                messages.appendChild(document.createElement('li')).textContent = item.msg;
+            });
+        }
+    };
+
+    // Automatically join the topic when the page loads
+    if (currentTopic) {
+        socket.emit('join topic', currentTopic);
+        loadMessages(currentTopic);
+        // You can update the logo or header text to show the topic name
+        document.querySelector('.logo').textContent = currentTopic;
+    } else {
+        // If no topic is found, redirect back to the homepage
+        window.location.href = '/';
+    }
+
+    leaveBtn.addEventListener('click', () => {
+        window.location.href = '/';
+    });
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (chatInput.value && currentTopic) {
+            const messageText = chatInput.value;
+            const { data, error } = await supabaseClient
+                .from('messages')
+                .insert({ topic: currentTopic, msg: messageText });
+            if (error) {
+                console.error('Error saving message to Supabase:', error);
+            } else {
+                socket.emit('chat message', { topic: currentTopic, msg: messageText });
+                chatInput.value = '';
+            }
+        }
+    });
+
+    socket.on('chat message', (msg) => {
+        const item = document.createElement('li');
+        item.textContent = msg;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+  </script>
+</body>
+</html>
