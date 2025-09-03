@@ -20,27 +20,31 @@
       <ul id="messages" class="messages-list"></ul>
     </main>
 
-    <div class="floating-topics-container">
-      <div id="topic-list" class="topic-list">
-        <button class="topic-btn">AI Ethics</button>
-        <button class="topic-btn">The Future of Work</button>
-        <button class="topic-btn">Climate Change Policies</button>
-        <button class="topic-btn">Social Media Impact</button>
-        <button class="topic-btn">Universal Basic Income</button>
+    <div class="bottom-ui-container">
+
+      <div class="floating-topics-container">
+        <div id="topic-list" class="topic-list">
+          <button class="topic-btn">AI Ethics</button>
+          <button class="topic-btn">The Future of Work</button>
+          <button class="topic-btn">Climate Change Policies</button>
+          <button class="topic-btn">Social Media Impact</button>
+          <button class="topic-btn">Universal Basic Income</button>
+        </div>
       </div>
+
+      <form id="topic-form" class="topic-form">
+          <input id="topic-input" class="topic-input" autocomplete="off" placeholder="Enter topic to join..." />
+          <button class="join-topic-btn">Join</button>
+      </form>
+
+      <form id="chat-form" class="chat-form">
+          <input id="input-box" class="input-box" autocomplete="off" placeholder="Type your message..." />
+          <button class="send-btn">Send</button>
+      </form>
+
+    </div>
     </div>
 
-    <form id="topic-form" class="topic-form">
-        <input id="topic-input" class="topic-input" autocomplete="off" placeholder="Enter topic to join..." />
-        <button class="join-topic-btn">Join</button>
-    </form>
-
-    <ul id="messages"></ul>
-
-    <form id="chat-form" class="chat-form">
-        <input id="input-box" class="input-box" autocomplete="off" placeholder="Type your message..." />
-        <button class="send-btn">Send</button>
-    </form>
 
     <div id="status">Connecting...</div>
         
@@ -58,8 +62,22 @@
             const form = document.getElementById('chat-form');
             const input = document.getElementById('input-box');
             const messages = document.getElementById('messages');
+            const topicButtons = document.querySelectorAll('.topic-btn');
 
             let currentTopic = '';
+
+            function setActiveTopic(topicName)
+            {
+                topicButtons.forEach(btn => {
+                    if (btn.textContent == topicName){
+                        btn.classList.add('active-topic');
+                    }
+                    else
+                    {
+                        btn.classList.remove('active-topic');
+                    }
+                });
+            }
 
             const loadMessages = async(topic) => {
                 messages.innerHTML ='';
@@ -87,6 +105,7 @@
                     currentTopic = topicInput.value;
                     socket.emit('join topic', currentTopic);
                     loadMessages(currentTopic);
+                    setActiveTopic(currentTopic);
                     topicInput.value = '';
                 }
             })
@@ -109,6 +128,18 @@
                         input.value = '';
                     }
                 }
+            });
+
+            topicButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const topicName = button.textContent;
+                    if (topicName) {
+                        currentTopic = topicName;
+                        socket.emit('join topic', currentTopic);
+                        loadMessages(currentTopic);
+                        setActiveTopic(currentTopic);
+                    }
+                });
             });
 
             socket.on('connect', () => {
