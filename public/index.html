@@ -30,21 +30,23 @@
       </div>
     </div>
 
-        <form id="topic-form" action="">
-            <input id="topic-input" autocomplete="off" placeholder="Enter topic to join..." /><button>Join</button>
-        </form>
+    <form id="topic-form" class="topic-form">
+        <input id="topic-input" class="topic-input" autocomplete="off" placeholder="Enter topic to join..." />
+        <button class="join-topic-btn">Join</button>
+    </form>
 
-        <ul id="messages"></ul>
+    <ul id="messages"></ul>
 
-        <form id ="chat-form" action="">
-        <input id ="input-box" autocomplete="off" placeholder="Type your message..."/><button>Send</button>
-        </form>
+    <form id="chat-form" class="chat-form">
+        <input id="input-box" class="input-box" autocomplete="off" placeholder="Type your message..." />
+        <button class="send-btn">Send</button>
+    </form>
 
-        <div id="status">Connecting...</div>
+    <div id="status">Connecting...</div>
         
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
-        <script src="/socket.io/socket.io.js"></script>
-        <script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
             const socket = io({ transports: ['polling'] });
             const SUPABASE_URL = 'https://uaimkoihbtpqtsbwwywa.supabase.co';
             const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhaW1rb2loYnRwcXRzYnd3eXdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4OTQ2NTEsImV4cCI6MjA3MjQ3MDY1MX0.4-6M8TtT0PRMfyIsvSo3dpjaj2IXatdgffWNWwruJqU';
